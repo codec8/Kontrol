@@ -4,14 +4,14 @@ A free, client-side financial planning tool that helps you match your paychecks 
 
 ## Features
 
-- 📅 **Interactive Calendar View** - Visual calendar showing income and expense days with running balance
-- 💰 **Income Tracking** - Add expected paychecks with dates and amounts
-- 💸 **Expense Management** - Track bills and expenses with due dates, categories, and recurring options
-- 🎯 **Smart Matching** - Automatically calculates which paychecks should be used for which bills
-- 📊 **Balance Projection** - See your projected balance day-by-day
-- 💾 **Data Export/Import** - Export to JSON or CSV, import your data back
-- 🌙 **Dark Mode** - Toggle between light and dark themes
-- 📱 **Responsive Design** - Works on desktop, tablet, and mobile devices
+- **Interactive Calendar View** - Visual calendar showing income and expense days with running balance
+- **Income Tracking** - Add expected paychecks with dates and amounts
+- **Expense Management** - Track bills and expenses with due dates, categories, and recurring options
+- **Smart Matching** - Automatically calculates which paychecks should be used for which bills
+- **Balance Projection** - See your projected balance day-by-day
+- **Data Export/Import** - Export to JSON or CSV, import your data back
+- **Dark Mode** - Toggle between light and dark themes
+- **Responsive Design** - Works on desktop, tablet, and mobile devices
 
 ## Getting Started
 
@@ -81,11 +81,11 @@ After deploying, you can add a custom domain in your hosting provider's settings
 ## Data Storage
 
 All data is stored locally in your browser's localStorage. This means:
-- ✅ No server costs
-- ✅ No tracking or analytics
-- ✅ Complete privacy
-- ⚠️ Data is device-specific (not synced across devices)
-- ⚠️ Clearing browser data will delete your information
+- No server costs
+- No tracking or analytics
+- Complete privacy
+- Data is device-specific (not synced across devices)
+- Clearing browser data will delete your information
 
 **Always export your data regularly!**
 
