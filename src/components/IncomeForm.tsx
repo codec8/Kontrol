@@ -1,0 +1,200 @@
+import { useState, useEffect } from 'react';
+import { format } from 'date-fns';
+import { Income } from '../types';
+import { storage } from '../utils/storage';
+
+interface IncomeFormProps {
+  onUpdate: () => void;
+}
+
+export const IncomeForm = ({ onUpdate }: IncomeFormProps) => {
+  const [incomes, setIncomes] = useState<Income[]>([]);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [formData, setFormData] = useState({
+    date: format(new Date(), 'yyyy-MM-dd'),
+    amount: '',
+    description: ''
+  });
+
+  useEffect(() => {
+    loadIncomes();
+  }, []);
+
+  const loadIncomes = () => {
+    const loaded = storage.getIncome();
+    setIncomes(loaded.sort((a, b) => a.date.getTime() - b.date.getTime()));
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    const amount = parseFloat(formData.amount);
+    if (isNaN(amount) || amount <= 0) {
+      alert('Please enter a valid amount');
+      return;
+    }
+
+    const income: Income = {
+      id: editingId || `income-${Date.now()}`,
+      date: new Date(formData.date),
+      amount,
+      description: formData.description || undefined
+    };
+
+    if (editingId) {
+      storage.updateIncome(editingId, income);
+    } else {
+      storage.addIncome(income);
+    }
+
+    resetForm();
+    loadIncomes();
+    onUpdate();
+  };
+
+  const handleEdit = (income: Income) => {
+    setEditingId(income.id);
+    setFormData({
+      date: format(income.date, 'yyyy-MM-dd'),
+      amount: income.amount.toString(),
+      description: income.description || ''
+    });
+    setIsFormOpen(true);
+  };
+
+  const handleDelete = (id: string) => {
+    if (window.confirm('Are you sure you want to delete this income entry?')) {
+      storage.deleteIncome(id);
+      loadIncomes();
+      onUpdate();
+    }
+  };
+
+  const resetForm = () => {
+    setFormData({
+      date: format(new Date(), 'yyyy-MM-dd'),
+      amount: '',
+      description: ''
+    });
+    setEditingId(null);
+    setIsFormOpen(false);
+  };
+
+  return (
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200">Expected Income</h2>
+        <button
+          onClick={() => setIsFormOpen(!isFormOpen)}
+          className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
+        >
+          {isFormOpen ? 'Cancel' : '+ Add Income'}
+        </button>
+      </div>
+
+      {isFormOpen && (
+        <form onSubmit={handleSubmit} className="mb-6 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Date
+              </label>
+              <input
+                type="date"
+                value={formData.date}
+                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Amount ($)
+              </label>
+              <input
+                type="number"
+                step="0.01"
+                min="0.01"
+                value={formData.amount}
+                onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                placeholder="0.00"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Description (optional)
+              </label>
+              <input
+                type="text"
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                placeholder="e.g., Paycheck, Freelance"
+              />
+            </div>
+          </div>
+          <div className="mt-4 flex gap-2">
+            <button
+              type="submit"
+              className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
+            >
+              {editingId ? 'Update' : 'Add'} Income
+            </button>
+            {editingId && (
+              <button
+                type="button"
+                onClick={resetForm}
+                className="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors"
+              >
+                Cancel
+              </button>
+            )}
+          </div>
+        </form>
+      )}
+
+      {incomes.length === 0 ? (
+        <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+          No income entries yet. Click "Add Income" to get started.
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {incomes.map(income => (
+            <div
+              key={income.id}
+              className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            >
+              <div className="flex-1">
+                <div className="font-semibold text-green-600 dark:text-green-400">
+                  ${income.amount.toFixed(2)}
+                </div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">
+                  {format(income.date, 'MMM d, yyyy')}
+                  {income.description && ` • ${income.description}`}
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => handleEdit(income)}
+                  className="px-3 py-1 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded transition-colors"
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={() => handleDelete(income.id)}
+                  className="px-3 py-1 text-sm bg-red-500 hover:bg-red-600 text-white rounded transition-colors"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
