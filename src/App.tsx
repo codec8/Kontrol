@@ -6,6 +6,7 @@ import { IncomeForm } from './components/IncomeForm';
 import { ExpenseForm } from './components/ExpenseForm';
 import { MatchingResults } from './components/MatchingResults';
 import { DataManagement } from './components/DataManagement';
+import { Analytics } from '@vercel/analytics/react';
 
 function App() {
   const [income, setIncome] = useState<Income[]>([]);
@@ -87,6 +88,7 @@ function App() {
           <p className="mt-2">All data is stored locally in your browser. No server, no tracking, no cost.</p>
         </div>
       </footer>
+      <Analytics />
     </div>
   );
 }
