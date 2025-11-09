@@ -1,6 +1,6 @@
 # Financial Calendar Tool
 
-A free, client-side financial planning tool that helps you match your paychecks to bills and expenses. All data is stored locally in your browser - no backend, no tracking, completely free.
+A free, client-side financial planning tool that helps you match your paychecks to bills and expenses. All data is stored locally in your browser - no backend, no tracking, completely free. Visit [objectsofcreation.com](https://www.objectsofcreation.com/) to preview. 
 
 ## Features
 
