@@ -1,28 +1,41 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, startOfWeek, endOfWeek } from 'date-fns';
 import { Income, Expense } from '../types';
 import { calculateBalanceProjection } from '../utils/balance';
+import { storage } from '../utils/storage';
 
 interface CalendarProps {
   income: Income[];
   expenses: Expense[];
+  currentMonth: Date;
+  onMonthChange: (month: Date) => void;
   onDateClick?: (date: Date) => void;
+  refreshKey?: number;
 }
 
-export const Calendar = ({ income, expenses, onDateClick }: CalendarProps) => {
-  const [currentMonth, setCurrentMonth] = useState(new Date());
+export const Calendar = ({ income, expenses, currentMonth, onMonthChange, onDateClick, refreshKey }: CalendarProps) => {
+  const [startingBalance, setStartingBalance] = useState<number | null>(null);
 
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(currentMonth);
   const calendarStart = startOfWeek(monthStart);
   const calendarEnd = endOfWeek(monthEnd);
   
+  useEffect(() => {
+    const monthStart = startOfMonth(currentMonth);
+    const monthKey = format(monthStart, 'yyyy-MM');
+    const balance = storage.getStartingBalance(monthKey);
+    setStartingBalance(balance);
+  }, [currentMonth, refreshKey]);
+
   const days = eachDayOfInterval({ start: calendarStart, end: calendarEnd });
   const balanceProjections = calculateBalanceProjection(
     income,
     expenses,
     calendarStart,
-    calendarEnd
+    calendarEnd,
+    startingBalance,
+    monthStart
   );
 
   const getDayIncome = (day: Date) => {
@@ -38,8 +51,8 @@ export const Calendar = ({ income, expenses, onDateClick }: CalendarProps) => {
     return projection ? projection.balance : null;
   };
 
-  const nextMonth = () => setCurrentMonth(addMonths(currentMonth, 1));
-  const prevMonth = () => setCurrentMonth(subMonths(currentMonth, 1));
+  const nextMonth = () => onMonthChange(addMonths(currentMonth, 1));
+  const prevMonth = () => onMonthChange(subMonths(currentMonth, 1));
 
   const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
