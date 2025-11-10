@@ -2,6 +2,7 @@ import { Income, Expense } from '../types';
 
 const INCOME_KEY = 'financial-calendar-income';
 const EXPENSE_KEY = 'financial-calendar-expenses';
+const STARTING_BALANCE_KEY = 'financial-calendar-starting-balances';
 
 // Helper to serialize dates for localStorage
 const serialize = (items: (Income | Expense)[]): string => {
@@ -109,17 +110,46 @@ export const storage = {
     storage.saveExpenses(all.filter(item => item.id !== id));
   },
 
+  // Starting balance operations (keyed by month: "YYYY-MM")
+  getStartingBalances: (): Record<string, number> => {
+    try {
+      const data = localStorage.getItem(STARTING_BALANCE_KEY);
+      if (!data) return {};
+      return JSON.parse(data);
+    } catch (error) {
+      console.error('Error loading starting balances:', error);
+      return {};
+    }
+  },
+
+  getStartingBalance: (monthKey: string): number | null => {
+    const balances = storage.getStartingBalances();
+    return balances[monthKey] ?? null;
+  },
+
+  setStartingBalance: (monthKey: string, balance: number): void => {
+    try {
+      const balances = storage.getStartingBalances();
+      balances[monthKey] = balance;
+      localStorage.setItem(STARTING_BALANCE_KEY, JSON.stringify(balances));
+    } catch (error) {
+      console.error('Error saving starting balance:', error);
+    }
+  },
+
   // Clear all data
   clearAll: (): void => {
     localStorage.removeItem(INCOME_KEY);
     localStorage.removeItem(EXPENSE_KEY);
+    localStorage.removeItem(STARTING_BALANCE_KEY);
   },
 
   // Export data
   exportData: (): string => {
     const income = storage.getIncome();
     const expenses = storage.getExpenses();
-    return JSON.stringify({ income, expenses }, null, 2);
+    const startingBalances = storage.getStartingBalances();
+    return JSON.stringify({ income, expenses, startingBalances }, null, 2);
   },
 
   // Import data
@@ -189,6 +219,14 @@ export const storage = {
         });
         storage.saveExpenses(parsed.expenses);
       }
+      
+      // Import starting balances if present
+      if (parsed.startingBalances && typeof parsed.startingBalances === 'object') {
+        const balances = storage.getStartingBalances();
+        Object.assign(balances, parsed.startingBalances);
+        localStorage.setItem(STARTING_BALANCE_KEY, JSON.stringify(balances));
+      }
+      
       return { success: true };
     } catch (error) {
       return { success: false, error: 'Invalid data format' };

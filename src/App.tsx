@@ -6,11 +6,14 @@ import { IncomeForm } from './components/IncomeForm';
 import { ExpenseForm } from './components/ExpenseForm';
 import { MatchingResults } from './components/MatchingResults';
 import { DataManagement } from './components/DataManagement';
+import { StartingBalanceForm } from './components/StartingBalanceForm';
 import { Analytics } from '@vercel/analytics/react';
 
 function App() {
   const [income, setIncome] = useState<Income[]>([]);
   const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [refreshKey, setRefreshKey] = useState(0);
   const [darkMode, setDarkMode] = useState(() => {
     const saved = localStorage.getItem('dark-mode');
     return saved ? JSON.parse(saved) : false;
@@ -32,6 +35,7 @@ function App() {
   const loadData = () => {
     setIncome(storage.getIncome());
     setExpenses(storage.getExpenses());
+    setRefreshKey(prev => prev + 1);
   };
 
   const toggleDarkMode = () => {
@@ -69,12 +73,19 @@ function App() {
           <ExpenseForm onUpdate={loadData} />
         </div>
 
-        <div className="mb-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          <StartingBalanceForm currentMonth={currentMonth} onUpdate={loadData} />
           <MatchingResults income={income} expenses={expenses} />
         </div>
 
         <div className="mb-6">
-          <Calendar income={income} expenses={expenses} />
+          <Calendar 
+            income={income} 
+            expenses={expenses} 
+            currentMonth={currentMonth}
+            onMonthChange={setCurrentMonth}
+            refreshKey={refreshKey}
+          />
         </div>
 
         <div className="max-w-md mx-auto">
