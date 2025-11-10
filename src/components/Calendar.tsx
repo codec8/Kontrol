@@ -142,6 +142,35 @@ export const Calendar = ({ income, expenses, currentMonth, onMonthChange, onDate
           const hasMultipleEntries = dayIncome.length > 0 && dayExpenses.length > 0;
           const totalIncome = dayIncome.reduce((sum, i) => sum + i.amount, 0);
           const totalExpenses = dayExpenses.reduce((sum, e) => sum + e.amount, 0);
+          const netAmount = totalIncome - totalExpenses;
+          const hasFinancialData = dayIncome.length > 0 || dayExpenses.length > 0;
+
+          // Determine background color based on net amount
+          let backgroundClass = '';
+          if (hasFinancialData) {
+            if (netAmount > 0) {
+              // Positive net: green background
+              backgroundClass = isToday 
+                ? 'bg-green-100 dark:bg-green-900/30' 
+                : 'bg-green-50 dark:bg-green-900/20';
+            } else if (netAmount < 0) {
+              // Negative net: red background
+              backgroundClass = isToday 
+                ? 'bg-red-100 dark:bg-red-900/30' 
+                : 'bg-red-50 dark:bg-red-900/20';
+            } else {
+              // Net is zero but has data: use today highlight if applicable
+              backgroundClass = isToday ? 'bg-blue-50 dark:bg-blue-900/20' : '';
+            }
+          } else {
+            // No financial data: use default or today highlight
+            backgroundClass = isToday ? 'bg-blue-50 dark:bg-blue-900/20' : '';
+          }
+
+          // Base background for current month vs other months
+          const baseBackground = isCurrentMonth 
+            ? (backgroundClass || 'bg-white dark:bg-gray-800')
+            : (backgroundClass || 'bg-gray-50 dark:bg-gray-900');
 
           return (
             <button
@@ -149,10 +178,9 @@ export const Calendar = ({ income, expenses, currentMonth, onMonthChange, onDate
               onClick={() => handleDayClick(day)}
               className={`
                 relative p-1.5 sm:p-2 md:p-3 min-h-[60px] sm:min-h-[80px] md:min-h-[100px] text-left border-r border-b border-gray-200 dark:border-gray-700
-                transition-colors flex flex-col
-                ${isCurrentMonth ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-900'}
-                ${isToday ? 'bg-blue-50 dark:bg-blue-900/20' : ''}
-                hover:bg-gray-50 dark:hover:bg-gray-700/50
+                transition-all flex flex-col
+                ${baseBackground}
+                ${hasFinancialData ? 'hover:ring-2 hover:ring-gray-300 dark:hover:ring-gray-600' : 'hover:bg-gray-50 dark:hover:bg-gray-700/50'}
               `}
             >
               <div className="flex items-start justify-between mb-1.5 md:mb-1">
