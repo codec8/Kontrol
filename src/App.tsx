@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Routes, Route, useNavigate } from 'react-router-dom';
 import { Income, Expense } from './types';
 import { storage } from './utils/storage';
 import { Calendar } from './components/Calendar';
@@ -10,8 +11,8 @@ import { StartingBalanceForm } from './components/StartingBalanceForm';
 import { Privacy } from './components/Privacy';
 import { Analytics } from '@vercel/analytics/react';
 
-function App() {
-  const [showPrivacy, setShowPrivacy] = useState(false);
+function MainPage() {
+  const navigate = useNavigate();
   const [income, setIncome] = useState<Income[]>([]);
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -43,10 +44,6 @@ function App() {
   const toggleDarkMode = () => {
     setDarkMode(!darkMode);
   };
-
-  if (showPrivacy) {
-    return <Privacy onBack={() => setShowPrivacy(false)} />;
-  }
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors">
@@ -105,7 +102,7 @@ function App() {
           <p className="mt-2">All data is stored locally in your browser. No server, no tracking, no cost.</p>
           <p className="mt-4">
             <button
-              onClick={() => setShowPrivacy(true)}
+              onClick={() => navigate('/privacy-policy')}
               className="text-blue-600 dark:text-blue-400 hover:underline"
             >
               Privacy Policy
@@ -115,6 +112,20 @@ function App() {
       </footer>
       <Analytics />
     </div>
+  );
+}
+
+function PrivacyWrapper() {
+  const navigate = useNavigate();
+  return <Privacy onBack={() => navigate('/')} />;
+}
+
+function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<MainPage />} />
+      <Route path="/privacy-policy" element={<PrivacyWrapper />} />
+    </Routes>
   );
 }
 
