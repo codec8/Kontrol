@@ -7,9 +7,11 @@ import { ExpenseForm } from './components/ExpenseForm';
 import { MatchingResults } from './components/MatchingResults';
 import { DataManagement } from './components/DataManagement';
 import { StartingBalanceForm } from './components/StartingBalanceForm';
+import { Privacy } from './components/Privacy';
 import { Analytics } from '@vercel/analytics/react';
 
 function App() {
+  const [showPrivacy, setShowPrivacy] = useState(false);
   const [income, setIncome] = useState<Income[]>([]);
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -41,6 +43,10 @@ function App() {
   const toggleDarkMode = () => {
     setDarkMode(!darkMode);
   };
+
+  if (showPrivacy) {
+    return <Privacy onBack={() => setShowPrivacy(false)} />;
+  }
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors">
@@ -97,6 +103,14 @@ function App() {
         <div className="container mx-auto px-4 py-6 text-center text-gray-600 dark:text-gray-400 text-sm">
           <p>Free Financial Calendar Tool - Plan your finances with ease</p>
           <p className="mt-2">All data is stored locally in your browser. No server, no tracking, no cost.</p>
+          <p className="mt-4">
+            <button
+              onClick={() => setShowPrivacy(true)}
+              className="text-blue-600 dark:text-blue-400 hover:underline"
+            >
+              Privacy Policy
+            </button>
+          </p>
         </div>
       </footer>
       <Analytics />
