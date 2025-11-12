@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, startOfWeek, endOfWeek } from 'date-fns';
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, startOfWeek, endOfWeek, subDays, isAfter, isBefore } from 'date-fns';
 import { Income, Expense } from '../types';
 import { calculateBalanceProjection } from '../utils/balance';
 import { storage } from '../utils/storage';
+import { useSubscription } from '../contexts/SubscriptionContext';
+import { UpgradePrompt } from './UpgradePrompt';
 
 interface CalendarProps {
   income: Income[];
@@ -13,10 +15,14 @@ interface CalendarProps {
   refreshKey?: number;
 }
 
+const FREE_TIER_DAYS_LIMIT = 30;
+
 export const Calendar = ({ income, expenses, currentMonth, onMonthChange, onDateClick, refreshKey }: CalendarProps) => {
+  const { subscription } = useSubscription();
   const [startingBalance, setStartingBalance] = useState<number | null>(null);
   const [selectedDay, setSelectedDay] = useState<Date | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
 
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(currentMonth);
@@ -30,10 +36,24 @@ export const Calendar = ({ income, expenses, currentMonth, onMonthChange, onDate
     setStartingBalance(balance);
   }, [currentMonth, refreshKey]);
 
+  // Filter income/expenses for free tier (last 30 days only)
+  const today = new Date();
+  const freeTierCutoffDate = subDays(today, FREE_TIER_DAYS_LIMIT);
+  const filteredIncome = subscription.tier === 'free' 
+    ? income.filter(item => !isBefore(item.date, freeTierCutoffDate))
+    : income;
+  const filteredExpenses = subscription.tier === 'free'
+    ? expenses.filter(item => !isBefore(item.date, freeTierCutoffDate))
+    : expenses;
+
+  // Check if current month is within free tier limit
+  const isMonthWithinLimit = subscription.tier === 'pro' || 
+    !isBefore(monthEnd, freeTierCutoffDate);
+
   const days = eachDayOfInterval({ start: calendarStart, end: calendarEnd });
   const balanceProjections = calculateBalanceProjection(
-    income,
-    expenses,
+    filteredIncome,
+    filteredExpenses,
     calendarStart,
     calendarEnd,
     startingBalance,
@@ -41,11 +61,11 @@ export const Calendar = ({ income, expenses, currentMonth, onMonthChange, onDate
   );
 
   const getDayIncome = (day: Date) => {
-    return income.filter(item => isSameDay(item.date, day));
+    return filteredIncome.filter(item => isSameDay(item.date, day));
   };
 
   const getDayExpenses = (day: Date) => {
-    return expenses.filter(item => isSameDay(item.date, day));
+    return filteredExpenses.filter(item => isSameDay(item.date, day));
   };
 
   const getDayBalance = (day: Date): number | null => {
@@ -63,8 +83,26 @@ export const Calendar = ({ income, expenses, currentMonth, onMonthChange, onDate
     return `$${balance.toFixed(2)}`;
   };
 
-  const nextMonth = () => onMonthChange(addMonths(currentMonth, 1));
-  const prevMonth = () => onMonthChange(subMonths(currentMonth, 1));
+  const nextMonth = () => {
+    const newMonth = addMonths(currentMonth, 1);
+    const newMonthEnd = endOfMonth(newMonth);
+    if (subscription.tier === 'free' && isBefore(newMonthEnd, freeTierCutoffDate)) {
+      setShowUpgradePrompt(true);
+      return;
+    }
+    onMonthChange(newMonth);
+  };
+
+  const prevMonth = () => {
+    const newMonth = subMonths(currentMonth, 1);
+    const newMonthEnd = endOfMonth(newMonth);
+    if (subscription.tier === 'free' && isBefore(newMonthEnd, freeTierCutoffDate)) {
+      setShowUpgradePrompt(true);
+      return;
+    }
+    onMonthChange(newMonth);
+  };
+
   const goToToday = () => onMonthChange(new Date());
 
   const handleDayClick = (day: Date) => {
@@ -91,15 +129,31 @@ export const Calendar = ({ income, expenses, currentMonth, onMonthChange, onDate
 
   return (
     <div className="bg-white dark:bg-gray-800 p-2 sm:p-4 md:p-6">
+      {showUpgradePrompt && (
+        <UpgradePrompt
+          title="Time Range Limit Reached"
+          message={`Free tier is limited to the last ${FREE_TIER_DAYS_LIMIT} days. Upgrade to Pro for unlimited time range!`}
+          onClose={() => setShowUpgradePrompt(false)}
+        />
+      )}
+
       <div className="flex items-center justify-between mb-3 sm:mb-4 md:mb-6">
-        <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 dark:text-gray-100">
-          {format(currentMonth, 'MMMM yyyy')}
-        </h2>
+        <div>
+          <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 dark:text-gray-100">
+            {format(currentMonth, 'MMMM yyyy')}
+          </h2>
+          {subscription.tier === 'free' && !isMonthWithinLimit && (
+            <p className="text-xs text-yellow-600 dark:text-yellow-400 mt-1">
+              Limited to last {FREE_TIER_DAYS_LIMIT} days
+            </p>
+          )}
+        </div>
         <div className="flex items-center gap-1 sm:gap-2">
           <button
             onClick={prevMonth}
-            className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+            className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             aria-label="Previous month"
+            disabled={subscription.tier === 'free' && isBefore(endOfMonth(subMonths(currentMonth, 1)), freeTierCutoffDate)}
           >
             <svg className="w-4 h-4 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -114,8 +168,9 @@ export const Calendar = ({ income, expenses, currentMonth, onMonthChange, onDate
           </button>
           <button
             onClick={nextMonth}
-            className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+            className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             aria-label="Next month"
+            disabled={subscription.tier === 'free' && isBefore(endOfMonth(addMonths(currentMonth, 1)), freeTierCutoffDate)}
           >
             <svg className="w-4 h-4 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -139,6 +194,7 @@ export const Calendar = ({ income, expenses, currentMonth, onMonthChange, onDate
           const balance = getDayBalance(day);
           const isCurrentMonth = isSameMonth(day, currentMonth);
           const isToday = isSameDay(day, new Date());
+          const isWithinFreeLimit = subscription.tier === 'pro' || !isBefore(day, freeTierCutoffDate);
           const hasMultipleEntries = dayIncome.length > 0 && dayExpenses.length > 0;
           const totalIncome = dayIncome.reduce((sum, i) => sum + i.amount, 0);
           const totalExpenses = dayExpenses.reduce((sum, e) => sum + e.amount, 0);
@@ -168,9 +224,12 @@ export const Calendar = ({ income, expenses, currentMonth, onMonthChange, onDate
           }
 
           // Base background for current month vs other months
-          const baseBackground = isCurrentMonth 
-            ? (backgroundClass || 'bg-white dark:bg-gray-800')
-            : (backgroundClass || 'bg-gray-50 dark:bg-gray-900');
+          // For free tier, gray out days outside the limit
+          const baseBackground = !isWithinFreeLimit
+            ? 'bg-gray-100 dark:bg-gray-900 opacity-50'
+            : isCurrentMonth 
+              ? (backgroundClass || 'bg-white dark:bg-gray-800')
+              : (backgroundClass || 'bg-gray-50 dark:bg-gray-900');
 
           return (
             <button

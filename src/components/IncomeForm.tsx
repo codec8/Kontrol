@@ -2,15 +2,21 @@ import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { Income } from '../types';
 import { storage } from '../utils/storage';
+import { useSubscription } from '../contexts/SubscriptionContext';
+import { UpgradePrompt } from './UpgradePrompt';
 
 interface IncomeFormProps {
   onUpdate: () => void;
 }
 
+const FREE_TIER_ENTRY_LIMIT = 15;
+
 export const IncomeForm = ({ onUpdate }: IncomeFormProps) => {
+  const { subscription } = useSubscription();
   const [incomes, setIncomes] = useState<Income[]>([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
   const [formData, setFormData] = useState({
     date: format(new Date(), 'yyyy-MM-dd'),
     amount: '',
@@ -33,6 +39,15 @@ export const IncomeForm = ({ onUpdate }: IncomeFormProps) => {
     if (isNaN(amount) || amount <= 0) {
       alert('Please enter a valid amount');
       return;
+    }
+
+    // Check entry limit for free tier (only when adding new, not editing)
+    if (!editingId && subscription.tier === 'free') {
+      const totalEntries = storage.getTotalEntryCount();
+      if (totalEntries >= FREE_TIER_ENTRY_LIMIT) {
+        setShowUpgradePrompt(true);
+        return;
+      }
     }
 
     const income: Income = {
@@ -81,13 +96,41 @@ export const IncomeForm = ({ onUpdate }: IncomeFormProps) => {
     setIsFormOpen(false);
   };
 
+  const totalEntries = storage.getTotalEntryCount();
+  const isAtLimit = subscription.tier === 'free' && totalEntries >= FREE_TIER_ENTRY_LIMIT;
+  const remainingEntries = subscription.tier === 'free' 
+    ? Math.max(0, FREE_TIER_ENTRY_LIMIT - totalEntries)
+    : null;
+
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+      {showUpgradePrompt && (
+        <UpgradePrompt
+          title="Entry Limit Reached"
+          message={`You've reached the free tier limit of ${FREE_TIER_ENTRY_LIMIT} entries. Upgrade to Pro for unlimited entries!`}
+          onClose={() => setShowUpgradePrompt(false)}
+        />
+      )}
+      
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200">Expected Income</h2>
+        <div>
+          <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200">Expected Income</h2>
+          {subscription.tier === 'free' && remainingEntries !== null && (
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              {remainingEntries} of {FREE_TIER_ENTRY_LIMIT} entries remaining
+            </p>
+          )}
+        </div>
         <button
-          onClick={() => setIsFormOpen(!isFormOpen)}
-          className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
+          onClick={() => {
+            if (isAtLimit && !editingId) {
+              setShowUpgradePrompt(true);
+            } else {
+              setIsFormOpen(!isFormOpen);
+            }
+          }}
+          className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          disabled={isAtLimit && !isFormOpen && !editingId}
         >
           {isFormOpen ? 'Cancel' : '+ Add Income'}
         </button>

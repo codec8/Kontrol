@@ -137,6 +137,11 @@ export const storage = {
     }
   },
 
+  // Get total entry count (income + expenses)
+  getTotalEntryCount: (): number => {
+    return storage.getIncome().length + storage.getExpenses().length;
+  },
+
   // Clear all data
   clearAll: (): void => {
     localStorage.removeItem(INCOME_KEY);
