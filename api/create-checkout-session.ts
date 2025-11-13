@@ -11,15 +11,24 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const { customerId } = req.body;
+    const { customerId, tier = 'pro' } = req.body;
 
-    // Get the price ID from environment variable or use placeholder
-    const priceId = process.env.STRIPE_PRICE_ID || 'price_placeholder';
+    // Get the price ID based on tier
+    let priceId: string;
+    let mode: 'subscription' | 'payment';
+
+    if (tier === 'lifetime') {
+      priceId = process.env.STRIPE_LIFETIME_PRICE_ID || 'price_lifetime_placeholder';
+      mode = 'payment'; // One-time payment for lifetime
+    } else {
+      priceId = process.env.STRIPE_PRICE_ID || 'price_placeholder';
+      mode = 'subscription'; // Recurring subscription for pro
+    }
 
     // Create checkout session
     const session = await stripe.checkout.sessions.create({
       customer: customerId || undefined,
-      mode: 'subscription',
+      mode,
       payment_method_types: ['card'],
       line_items: [
         {
@@ -30,6 +39,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       success_url: `${req.headers.origin || 'http://localhost:5173'}?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${req.headers.origin || 'http://localhost:5173'}`,
       allow_promotion_codes: true,
+      metadata: {
+        tier: tier, // Store tier in metadata for webhook processing
+      },
     });
 
     return res.status(200).json({ sessionId: session.id, url: session.url });

@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
-export type SubscriptionTier = 'free' | 'pro';
+export type SubscriptionTier = 'free' | 'pro' | 'lifetime';
 
 export interface SubscriptionStatus {
   isActive: boolean;
@@ -16,7 +16,7 @@ interface SubscriptionContextType {
   verifySubscription: () => Promise<void>;
   customerId: string | null;
   setCustomerId: (id: string | null) => void;
-  openCheckout: () => Promise<void>;
+  openCheckout: (tier?: 'pro' | 'lifetime') => Promise<void>;
 }
 
 const SubscriptionContext = createContext<SubscriptionContextType | undefined>(undefined);
@@ -110,14 +110,14 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const openCheckout = async () => {
+  const openCheckout = async (tier: 'pro' | 'lifetime' = 'pro') => {
     try {
       const response = await fetch('/api/create-checkout-session', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ customerId }),
+        body: JSON.stringify({ customerId, tier }),
       });
 
       if (!response.ok) {

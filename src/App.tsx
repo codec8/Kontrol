@@ -9,6 +9,7 @@ import { MatchingResults } from './components/MatchingResults';
 import { DataManagement } from './components/DataManagement';
 import { StartingBalanceForm } from './components/StartingBalanceForm';
 import { Privacy } from './components/Privacy';
+import { Pricing } from './components/Pricing';
 import { Analytics } from '@vercel/analytics/react';
 import { useSubscription } from './contexts/SubscriptionContext';
 
@@ -51,10 +52,19 @@ function MainPage() {
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors">
       <header className="bg-white dark:bg-gray-800 shadow-md">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200">
+          <h1 
+            className="text-2xl font-bold text-gray-800 dark:text-gray-200 cursor-pointer"
+            onClick={() => navigate('/')}
+          >
             Financial Calendar Tool
           </h1>
           <div className="flex items-center gap-3">
+            <button
+              onClick={() => navigate('/pricing')}
+              className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 font-medium transition-colors"
+            >
+              Pricing
+            </button>
             {subscription.tier === 'free' && (
               <button
                 onClick={openCheckout}
@@ -69,6 +79,14 @@ function MainPage() {
                   <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                 </svg>
                 Pro
+              </div>
+            )}
+            {subscription.tier === 'lifetime' && (
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 rounded-lg text-sm font-medium">
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                Lifetime
               </div>
             )}
             <button
@@ -144,6 +162,7 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={<MainPage />} />
+      <Route path="/pricing" element={<Pricing />} />
       <Route path="/privacy-policy" element={<PrivacyWrapper />} />
     </Routes>
   );

@@ -15,7 +15,9 @@ This guide will help you set up Stripe subscriptions for the Financial Calendar 
    - Use test keys for development (`pk_test_...` and `sk_test_...`)
    - Use live keys for production (`pk_live_...` and `sk_live_...`)
 
-## Step 2: Create a Product and Price
+## Step 2: Create Products and Prices
+
+### Create Pro Subscription Product
 
 1. In Stripe Dashboard, go to **Products** → **Add product**
 2. Fill in:
@@ -25,7 +27,19 @@ This guide will help you set up Stripe subscriptions for the Financial Calendar 
      - **Recurring**: Monthly
      - **Price**: $4.99 (or your preferred price)
 3. Click **Save product**
-4. Copy the **Price ID** (starts with `price_...`)
+4. Copy the **Price ID** (starts with `price_...`) - this is your `STRIPE_PRICE_ID`
+
+### Create Lifetime Product
+
+1. In Stripe Dashboard, go to **Products** → **Add product**
+2. Fill in:
+   - **Name**: "Financial Calendar Lifetime" (or your preferred name)
+   - **Description**: "One-time payment for lifetime access to all Pro features"
+   - **Pricing**: 
+     - **One-time**: (not recurring)
+     - **Price**: $12.99 (or your preferred price)
+3. Click **Save product**
+4. Copy the **Price ID** (starts with `price_...`) - this is your `STRIPE_LIFETIME_PRICE_ID`
 
 ## Step 3: Set Up Environment Variables
 
@@ -36,7 +50,8 @@ This guide will help you set up Stripe subscriptions for the Financial Calendar 
    ```
    STRIPE_SECRET_KEY=sk_test_your_secret_key_here
    STRIPE_PUBLISHABLE_KEY=pk_test_your_publishable_key_here
-   STRIPE_PRICE_ID=price_your_price_id_here
+   STRIPE_PRICE_ID=price_your_pro_price_id_here
+   STRIPE_LIFETIME_PRICE_ID=price_your_lifetime_price_id_here
    STRIPE_WEBHOOK_SECRET=whsec_placeholder
    ```
 
@@ -47,7 +62,8 @@ This guide will help you set up Stripe subscriptions for the Financial Calendar 
 3. Add the following variables:
    - `STRIPE_SECRET_KEY` (use production key for production, test key for preview)
    - `STRIPE_PUBLISHABLE_KEY` (optional, if you need it in frontend)
-   - `STRIPE_PRICE_ID`
+   - `STRIPE_PRICE_ID` (Pro subscription price ID)
+   - `STRIPE_LIFETIME_PRICE_ID` (Lifetime one-time payment price ID)
    - `STRIPE_WEBHOOK_SECRET` (see Step 4)
 
 ## Step 4: Set Up Webhook Endpoint
@@ -72,6 +88,7 @@ Webhooks allow Stripe to notify your app about subscription events (payments, ca
 4. Set the endpoint URL to: `https://your-domain.com/api/webhook`
 5. Select events to listen to:
    - `checkout.session.completed`
+   - `payment_intent.succeeded` (for lifetime purchases)
    - `customer.subscription.created`
    - `customer.subscription.updated`
    - `customer.subscription.deleted`

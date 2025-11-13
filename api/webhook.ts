@@ -28,7 +28,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     case 'checkout.session.completed':
       const session = event.data.object as Stripe.Checkout.Session;
       console.log('Checkout session completed:', session.id);
+      if (session.metadata?.tier === 'lifetime') {
+        console.log('Lifetime purchase completed for customer:', session.customer);
+      }
       // You can add logic here to update your database or send confirmation emails
+      break;
+
+    case 'payment_intent.succeeded':
+      const paymentIntent = event.data.object as Stripe.PaymentIntent;
+      if (paymentIntent.metadata?.tier === 'lifetime') {
+        console.log('Lifetime payment succeeded:', paymentIntent.id, 'for customer:', paymentIntent.customer);
+      }
       break;
 
     case 'customer.subscription.created':
