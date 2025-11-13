@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, startOfWeek, endOfWeek, subDays, isAfter, isBefore } from 'date-fns';
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, startOfWeek, endOfWeek, subDays, isBefore } from 'date-fns';
 import { Income, Expense } from '../types';
 import { calculateBalanceProjection } from '../utils/balance';
 import { storage } from '../utils/storage';

@@ -13,7 +13,7 @@ export const UpgradePrompt = ({
   onClose,
   variant = 'modal' 
 }: UpgradePromptProps) => {
-  const { openCheckout, subscription } = useSubscription();
+  const { openCheckout } = useSubscription();
 
   const defaultTitle = title || 'Upgrade to Pro';
   const defaultMessage = message || 'Unlock unlimited entries, unlimited time range, and advanced features with Pro.';
