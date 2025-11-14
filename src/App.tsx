@@ -56,7 +56,7 @@ function MainPage() {
             className="text-2xl font-bold text-gray-800 dark:text-gray-200 cursor-pointer"
             onClick={() => navigate('/')}
           >
-            Financial Calendar Tool
+            Scheduloris
           </h1>
           <div className="flex items-center gap-3">
             <button
