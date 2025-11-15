@@ -23,3 +23,7 @@ dist-ssr
 *.sln
 *.sw?
 
+# Accidental files
+vite
+financial-calendar-tool@*
+
