@@ -50,28 +50,28 @@ export const StartingBalanceForm = ({ currentMonth, onUpdate }: StartingBalanceF
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-      <div className="flex items-center justify-between mb-4">
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4">
+      <div className="flex items-center justify-between mb-3">
         <div>
-          <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200">Starting Balance</h2>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+          <h2 className="text-base font-semibold text-gray-800 dark:text-gray-200">Starting Balance</h2>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
             {format(currentMonth, 'MMMM yyyy')}
           </p>
         </div>
         <button
           onClick={() => setIsFormOpen(!isFormOpen)}
-          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+          className="px-3 py-1.5 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors"
         >
           {isFormOpen ? 'Cancel' : startingBalance !== null ? 'Edit' : 'Set Balance'}
         </button>
       </div>
 
       {startingBalance !== null && !isFormOpen && (
-        <div className="mb-4 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+        <div className="mb-3 p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">Current Starting Balance</div>
-              <div className="text-2xl font-bold text-gray-800 dark:text-gray-200">
+              <div className="text-xs text-gray-500 dark:text-gray-400">Current Starting Balance</div>
+              <div className="text-lg font-semibold text-gray-800 dark:text-gray-200">
                 ${startingBalance.toFixed(2)}
               </div>
             </div>
@@ -80,7 +80,7 @@ export const StartingBalanceForm = ({ currentMonth, onUpdate }: StartingBalanceF
       )}
 
       {isFormOpen && (
-        <form onSubmit={handleSubmit} className="mb-4 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+        <form onSubmit={handleSubmit} className="mb-3 p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Starting Balance for {format(currentMonth, 'MMMM yyyy')} ($)
@@ -129,7 +129,7 @@ export const StartingBalanceForm = ({ currentMonth, onUpdate }: StartingBalanceF
       )}
 
       {startingBalance === null && !isFormOpen && (
-        <div className="text-center py-4 text-gray-500 dark:text-gray-400 text-sm">
+        <div className="text-center py-4 text-gray-500 dark:text-gray-400 text-xs">
           No starting balance set for this month. Click "Set Balance" to add one.
         </div>
       )}

@@ -8,6 +8,8 @@ import { ExpenseForm } from './components/ExpenseForm';
 import { MatchingResults } from './components/MatchingResults';
 import { DataManagement } from './components/DataManagement';
 import { StartingBalanceForm } from './components/StartingBalanceForm';
+import { Tabs } from './components/Tabs';
+import { CompletionBar } from './components/CompletionBar';
 import { Privacy } from './components/Privacy';
 import { Pricing } from './components/Pricing';
 import { Analytics } from '@vercel/analytics/react';
@@ -109,16 +111,44 @@ function MainPage() {
       </header>
 
       <main className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          <IncomeForm onUpdate={loadData} />
-          <ExpenseForm onUpdate={loadData} />
+        {/* Tabbed Interface for Main Modules */}
+        <div className="mb-8">
+          <Tabs
+            tabs={[
+              {
+                id: 'income',
+                label: 'Expected Income',
+                content: <IncomeForm onUpdate={loadData} />
+              },
+              {
+                id: 'expenses',
+                label: 'Bills & Expenses',
+                content: <ExpenseForm onUpdate={loadData} />
+              },
+              {
+                id: 'balance',
+                label: 'Starting Balance',
+                content: <StartingBalanceForm currentMonth={currentMonth} onUpdate={loadData} />
+              },
+              {
+                id: 'matcher',
+                label: 'Paycheck Matcher',
+                content: <MatchingResults income={income} expenses={expenses} />
+              },
+              {
+                id: 'data',
+                label: 'Data Management',
+                content: <DataManagement />
+              }
+            ]}
+            defaultTab="income"
+          />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          <StartingBalanceForm currentMonth={currentMonth} onUpdate={loadData} />
-          <MatchingResults income={income} expenses={expenses} />
-        </div>
+        {/* Completion Bar - Income vs Expenses */}
+        <CompletionBar income={income} expenses={expenses} />
 
+        {/* Calendar View */}
         <div className="mb-6">
           <Calendar 
             income={income} 
@@ -127,10 +157,6 @@ function MainPage() {
             onMonthChange={setCurrentMonth}
             refreshKey={refreshKey}
           />
-        </div>
-
-        <div className="max-w-md mx-auto">
-          <DataManagement />
         </div>
       </main>
 

@@ -88,46 +88,46 @@ export const DataManagement = () => {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-      <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200 mb-4">Data Management</h2>
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4">
+      <h2 className="text-base font-semibold text-gray-800 dark:text-gray-200 mb-3">Data Management</h2>
       
-      <div className="space-y-3">
+      <div className="space-y-2">
         <button
           onClick={handleExport}
-          className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+          className="w-full px-3 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors"
         >
           Export to JSON
         </button>
         
         <button
           onClick={handleExportCSV}
-          className="w-full px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
+          className="w-full px-3 py-2 text-sm bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors"
         >
           Export to CSV
         </button>
 
         <button
           onClick={() => setShowImport(!showImport)}
-          className="w-full px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg transition-colors"
+          className="w-full px-3 py-2 text-sm bg-yellow-600 hover:bg-yellow-700 text-white rounded-md transition-colors"
         >
           {showImport ? 'Cancel Import' : 'Import Data'}
         </button>
 
         {showImport && (
-          <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <div className="mt-3 p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">
               Paste JSON data:
             </label>
             <textarea
               value={importData}
               onChange={(e) => setImportData(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-mono text-sm"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-mono text-xs"
               rows={6}
               placeholder='{"income": [...], "expenses": [...]}'
             />
             <button
               onClick={handleImport}
-              className="mt-2 w-full px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg transition-colors"
+              className="mt-2 w-full px-3 py-2 text-sm bg-yellow-600 hover:bg-yellow-700 text-white rounded-md transition-colors"
             >
               Import
             </button>
@@ -136,14 +136,14 @@ export const DataManagement = () => {
 
         <button
           onClick={handleClearAll}
-          className="w-full px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+          className="w-full px-3 py-2 text-sm bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors"
         >
           Clear All Data
         </button>
       </div>
 
-      <div className="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
-        <p className="text-sm text-yellow-800 dark:text-yellow-300">
+      <div className="mt-3 p-2.5 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-md">
+        <p className="text-xs text-yellow-800 dark:text-yellow-300">
           💡 <strong>Tip:</strong> Export your data regularly to prevent data loss. Your data is stored locally in your browser.
         </p>
       </div>

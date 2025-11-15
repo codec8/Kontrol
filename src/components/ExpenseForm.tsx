@@ -111,7 +111,7 @@ export const ExpenseForm = ({ onUpdate }: ExpenseFormProps) => {
     : null;
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4">
       {showUpgradePrompt && (
         <UpgradePrompt
           title="Entry Limit Reached"
@@ -120,11 +120,11 @@ export const ExpenseForm = ({ onUpdate }: ExpenseFormProps) => {
         />
       )}
       
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-3">
         <div>
-          <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200">Bills & Expenses</h2>
+          <h2 className="text-base font-semibold text-gray-800 dark:text-gray-200">Bills & Expenses</h2>
           {subscription.tier === 'free' && remainingEntries !== null && (
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
               {remainingEntries} of {FREE_TIER_ENTRY_LIMIT} entries remaining
             </p>
           )}
@@ -137,7 +137,7 @@ export const ExpenseForm = ({ onUpdate }: ExpenseFormProps) => {
               setIsFormOpen(!isFormOpen);
             }
           }}
-          className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-3 py-1.5 text-sm bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           disabled={isAtLimit && !isFormOpen && !editingId}
         >
           {isFormOpen ? 'Cancel' : '+ Add Expense'}
@@ -145,7 +145,7 @@ export const ExpenseForm = ({ onUpdate }: ExpenseFormProps) => {
       </div>
 
       {isFormOpen && (
-        <form onSubmit={handleSubmit} className="mb-6 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+        <form onSubmit={handleSubmit} className="mb-4 p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -232,36 +232,36 @@ export const ExpenseForm = ({ onUpdate }: ExpenseFormProps) => {
       )}
 
       {expenses.length === 0 ? (
-        <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+        <div className="text-center py-6 text-sm text-gray-500 dark:text-gray-400">
           No expenses yet. Click "Add Expense" to get started.
         </div>
       ) : (
-        <div className="space-y-2">
+        <div className="space-y-1">
           {expenses.map(expense => (
             <div
               key={expense.id}
-              className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-900 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
             >
-              <div className="flex-1">
-                <div className="font-semibold text-red-600 dark:text-red-400">
+              <div className="flex-1 min-w-0">
+                <div className="text-sm font-medium text-red-600 dark:text-red-400">
                   ${expense.amount.toFixed(2)}
                 </div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">
+                <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
                   {format(expense.date, 'MMM d, yyyy')} • {expense.description}
                   {expense.category && ` • ${expense.category}`}
                   {expense.isRecurring && <span className="text-blue-600 dark:text-blue-400"> (Recurring)</span>}
                 </div>
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-1.5 ml-2">
                 <button
                   onClick={() => handleEdit(expense)}
-                  className="px-3 py-1 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded transition-colors"
+                  className="px-2 py-1 text-xs bg-blue-500 hover:bg-blue-600 text-white rounded transition-colors"
                 >
                   Edit
                 </button>
                 <button
                   onClick={() => handleDelete(expense.id)}
-                  className="px-3 py-1 text-sm bg-red-500 hover:bg-red-600 text-white rounded transition-colors"
+                  className="px-2 py-1 text-xs bg-red-500 hover:bg-red-600 text-white rounded transition-colors"
                 >
                   Delete
                 </button>
